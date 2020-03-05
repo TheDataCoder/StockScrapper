@@ -7,7 +7,7 @@ resp = requests.get(url)
 
 soup = BeautifulSoup(resp.text, 'html.parser')
 
-class stocks(self):
+class Stocks:
 
     def scrap(self, stocks:list):
         """
