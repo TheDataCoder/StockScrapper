@@ -4,6 +4,7 @@ import os
 import requests
 import matplotlib as plt
 from bs4 import BeautifulSoup
+import pandas as pd
 
 from oauth2client import client
 from oauth2client import tools
@@ -59,8 +60,7 @@ class Stocks:
         self.stocks = stocks
         self.stock_symbols = stock_symbols
 
-
-    def scrap(self, stocks=None, stock_symbols=None):
+    def scrap(self):
         """
         Scrap the stock prices by inputting stock names or stock symbols and save them pd DataFrame.
 
@@ -77,7 +77,35 @@ class Stocks:
         stock_frame : df
                 Pandas DataFrame with scrapped stock prices
         """
-        pass
+
+        def names(stocks):
+            data = pd.DataFrame()
+            for name in stocks:
+                url = "https://finance.yahoo.com/lookup?s={}".format(name)
+                d = pd.read_html(url)
+                df = d[0].dropna(axis=0, thresh=4)
+                df = df.drop('Industry / Category', 1)
+                df = df[df['Name'].str.contains(name, case=False)]
+                data = pd.concat([data, df], ignore_index=True)
+            return data
+
+        def symbols(stock_symbols):
+            data = pd.DataFrame()
+            for symbol in stock_symbols:
+                url = "https://finance.yahoo.com/lookup?s={}".format(symbol)
+                d = pd.read_html(url)
+                df = d[0].dropna(axis=0, thresh=4)
+                df = df.drop('Industry / Category', 1)
+                df = df[df['Symbol'].str.contains(symbol, case=False)]
+                data = pd.concat([data, df], ignore_index=True)
+            return data
+
+        if self.stocks is not None:
+            stock_frame = names(self.stocks)
+        if self.stock_symbols is not None:
+            stock_frame = symbols(self.stock_symbols)
+
+        return stock_frame
 
     def write_cloud(self, stock_frame):
         """
