@@ -56,11 +56,7 @@ class ApiAuth:
 
 class Stocks:
 
-    def __init__(self, stocks, stock_symbols):
-        self.stocks = stocks
-        self.stock_symbols = stock_symbols
-
-    def scrap(self):
+    def scrap(self, stocks=None, stock_symbols=None):
         """
         Scrap the stock prices by inputting stock names or stock symbols and save them pd DataFrame.
 
@@ -82,28 +78,40 @@ class Stocks:
             data = pd.DataFrame()
             for name in stocks:
                 url = "https://finance.yahoo.com/lookup?s={}".format(name)
-                d = pd.read_html(url)
-                df = d[0].dropna(axis=0, thresh=4)
-                df = df.drop('Industry / Category', 1)
-                df = df[df['Name'].str.contains(name, case=False)]
-                data = pd.concat([data, df], ignore_index=True)
+                resp = requests.get(url).text
+                soup = BeautifulSoup(resp, "lxml")
+                not_found = soup.find_all('div', {'Mt(25px) Bdw(1px) Bdc($borderGray) Bds(s) Bdrs(3px) Pt(50px) Pb(60px) Px(15px) smartphone_Mx(20px) smartphone_Mb(30px)'})
+                if not_found:
+                    print('stock ' + name + ' was not found')
+                else:
+                    d = pd.read_html(url)
+                    df = d[0].dropna(axis=0, thresh=4)
+                    df = df.drop('Industry / Category', 1)
+                    df = df[df['Name'].str.contains(name, case=False)]
+                    data = pd.concat([data, df], ignore_index=True)
             return data
 
         def symbols(stock_symbols):
             data = pd.DataFrame()
             for symbol in stock_symbols:
                 url = "https://finance.yahoo.com/lookup?s={}".format(symbol)
-                d = pd.read_html(url)
-                df = d[0].dropna(axis=0, thresh=4)
-                df = df.drop('Industry / Category', 1)
-                df = df[df['Symbol'].str.contains(symbol, case=False)]
-                data = pd.concat([data, df], ignore_index=True)
+                resp = requests.get(url).text
+                soup = BeautifulSoup(resp, "lxml")
+                not_found = soup.find_all('div', {'Mt(25px) Bdw(1px) Bdc($borderGray) Bds(s) Bdrs(3px) Pt(50px) Pb(60px) Px(15px) smartphone_Mx(20px) smartphone_Mb(30px)'})
+                if not_found:
+                    print('stock ' + symbol + ' was not found')
+                else:
+                    d = pd.read_html(url)
+                    df = d[0].dropna(axis=0, thresh=4)
+                    df = df.drop('Industry / Category', 1)
+                    df = df[df['Symbol'].str.contains(symbol, case=False)]
+                    data = pd.concat([data, df], ignore_index=True)
             return data
 
-        if self.stocks is not None:
-            stock_frame = names(self.stocks)
-        if self.stock_symbols is not None:
-            stock_frame = symbols(self.stock_symbols)
+        if stocks is not None:
+            stock_frame = names(stocks)
+        if stock_symbols is not None:
+            stock_frame = symbols(stock_symbols)
 
         return stock_frame
 
