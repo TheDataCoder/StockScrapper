@@ -1,3 +1,10 @@
+"""
+A small script to get data from yahoo finance and upload it to your Google Spreadsheet
+
+Further development may include direct export to csv file and setting alarms to user in case if stock price drops
+"""
+
+
 from __future__ import print_function
 import httplib2
 import csv
