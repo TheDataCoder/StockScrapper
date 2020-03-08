@@ -11,3 +11,17 @@ looking for stock location on other exchanges.
 2. `Stock symbols` - directly input stock symbols to get information about the specific stock.
 
 You can directly input stock names or symbols from CSV file. Please keep values to input in first column.
+
+### Requirements 
+
+This script uploads the information directly to your google sheet, hence you need to get your Google API credentials JSON file from:
+
+https://console.developers.google.com/apis/credentials 
+
+You can read more about API credentials here:
+
+https://cloud.google.com/docs/authentication
+
+Please place the credentials file in the same folder as the script.
+
+
