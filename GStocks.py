@@ -28,11 +28,14 @@ class ApiAuth:
         self.application_name = application_name
 
     def getCredentials(self):
+        """
 
-        """Gets valid user credentials from storage.
+        Gets valid user credentials from storage.
         If nothing has been stored, or if the stored credentials are invalid,
         the OAuth2 flow is completed to obtain the new credentials.
-        :return:
+
+        Returns
+        ----------
             Credentials, the obtained credential.
         """
 
