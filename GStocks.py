@@ -110,7 +110,7 @@ def scrap(stocks=None, stock_symbols=None):
                 d = pd.read_html(url)
                 df = d[0].dropna(axis=0, thresh=4)
                 df = df.drop('Industry / Category', 1)
-                df = df[df['Symbol'].str.contains(symbol, case=False)]
+                df = df[df['Symbol'].str.contains('\\b{}\\b'.format(symbol), regex=True, case=False)]
                 data = pd.concat([data, df], ignore_index=True)
         return data
 
@@ -126,6 +126,7 @@ def scrap(stocks=None, stock_symbols=None):
 
         for symbol in dataframe['Symbol'].values:
             url = 'https://finance.yahoo.com/quote/{}'.format(symbol)
+            url = requote_uri(url)
             resp = requests.get(url)
             soup = BeautifulSoup(resp.text, "html.parser")
 
@@ -141,6 +142,7 @@ def scrap(stocks=None, stock_symbols=None):
 
     if stocks is not None:
         stock_frame = names(stocks)
+
     if stock_symbols is not None:
         stock_frame = symbols(stock_symbols)
 
