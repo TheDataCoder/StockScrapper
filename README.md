@@ -1,10 +1,10 @@
-# Easy way to get latest information about the stocks you follow
+### Easy way to get latest information about the stocks you follow
 
-The program allows to get the latest Stock/MF/ETF information including last and current prices, day's range, 52 week range, beta coefficient, P/E ratio, earnings per share, earnings date, ex-dividend date and other miscellaneous information.
+The script allows you to get the latest Stock/MF/ETF information including last and current prices, day's range, 52 week range, beta coefficient, P/E ratio, earnings per share, earnings date, ex-dividend date and other miscellaneous information.
 
 ### Inputs
 
-The program allows the following inputs:
+The script allows following inputs:
 
 1. `Stock names` - input the names of stocks you are looking for in case if you don't know corresponding stock symbol or
 looking for stock location on other exchanges.
