@@ -1,29 +1,32 @@
-from bs4 import BeautifulSoup
+import GStocks
 import requests
-import sys
-from datetime import datetime, timedelta
 import pandas as pd
+from bs4 import BeautifulSoup
 
-def names(stocks):
-    data = pd.DataFrame()
-    for name in stocks:
-        url = "https://finance.yahoo.com/lookup?s={}".format(name)
-        d = pd.read_html(url)
-        df = d[0].dropna(axis=0, thresh=4)
-        df = df.drop('Industry / Category', 1)
-        df = df[df['Name'].str.contains(name, case=False)]
-        data = pd.concat([data, df], ignore_index=True)
-    return data
+symbols = ['advadv', 'TL0.DE', 'TSLA.MX', 'TL0.F']
 
-def symbols(stock_symbols):
-    data = pd.DataFrame()
-    for symbol in stocks:
-        url = "https://finance.yahoo.com/lookup?s={}".format(symbol)
-        d = pd.read_html(url)
-        df = d[0].dropna(axis=0, thresh=4)
-        df = df.drop('Industry / Category', 1)
-        df = df[df['Symbol'].str.contains(symbol, case=False)]
-        data = pd.concat([data, df], ignore_index=True)
-    return data
+df = GStocks.scrap(stock_symbols=symbols)
 
-names(['Tesla', 'Keyence'])
+def fill_table(dataframe):
+
+    columns = ['Previous Close', 'Open', "Day's Range", '52 Week Range', 'Beta', 'PE Ratio', 'EPS', 'Earnings Date', 'Ex-Dividend Date']
+
+    cells = ['PREV_CLOSE-value', 'OPEN-value', 'DAYS_RANGE-value', 'FIFTY_TWO_WK_RANGE-value', 'BETA_5Y-value',
+             'PE_RATIO-value', 'EPS_RATIO-value', 'EARNINGS_DATE-value', 'EX_DIVIDEND_DATE-value']
+
+    values, L = [], []
+
+    for symbol in dataframe['Symbol'].values:
+        url = 'https://finance.yahoo.com/quote/{}'.format(symbol)
+        resp = requests.get(url)
+        soup = BeautifulSoup(resp.text, "html.parser")
+
+        for cell in cells:
+            values.append(soup.find_all('div', {'id': 'quote-summary'})[0].find('td', {'data-test': cell}).text)
+        L.append(values)
+        values = []
+
+    return pd.concat([dataframe, pd.DataFrame(L, columns=columns)], axis=1)
+
+dataframe = fill_table(df)
+print(dataframe.head())

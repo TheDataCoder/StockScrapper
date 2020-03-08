@@ -1,0 +1,267 @@
+[1mdiff --git a/ApiAuth.py b/ApiAuth.py[m
+[1mindex b093404..82d00a3 100644[m
+[1m--- a/ApiAuth.py[m
+[1m+++ b/ApiAuth.py[m
+[36m@@ -4,6 +4,7 @@[m [mimport os[m
+ import requests[m
+ import matplotlib as plt[m
+ from bs4 import BeautifulSoup[m
+[32m+[m[32mimport pandas as pd[m
+ [m
+ from oauth2client import client[m
+ from oauth2client import tools[m
+[36m@@ -55,11 +56,6 @@[m [mclass ApiAuth:[m
+ [m
+ class Stocks:[m
+ [m
+[31m-    def __init__(self, stocks, stock_symbols):[m
+[31m-        self.stocks = stocks[m
+[31m-        self.stock_symbols = stock_symbols[m
+[31m-[m
+[31m-[m
+     def scrap(self, stocks=None, stock_symbols=None):[m
+         """[m
+         Scrap the stock prices by inputting stock names or stock symbols and save them pd DataFrame.[m
+[36m@@ -77,7 +73,47 @@[m [mclass Stocks:[m
+         stock_frame : df[m
+                 Pandas DataFrame with scrapped stock prices[m
+         """[m
+[31m-        pass[m
+[32m+[m
+[32m+[m[32m        def names(stocks):[m
+[32m+[m[32m            data = pd.DataFrame()[m
+[32m+[m[32m            for name in stocks:[m
+[32m+[m[32m                url = "https://finance.yahoo.com/lookup?s={}".format(name)[m
+[32m+[m[32m                resp = requests.get(url).text[m
+[32m+[m[32m                soup = BeautifulSoup(resp, "lxml")[m
+[32m+[m[32m                not_found = soup.find_all('div', {'Mt(25px) Bdw(1px) Bdc($borderGray) Bds(s) Bdrs(3px) Pt(50px) Pb(60px) Px(15px) smartphone_Mx(20px) smartphone_Mb(30px)'})[m
+[32m+[m[32m                if not_found:[m
+[32m+[m[32m                    print('stock ' + name + ' was not found')[m
+[32m+[m[32m                else:[m
+[32m+[m[32m                    d = pd.read_html(url)[m
+[32m+[m[32m                    df = d[0].dropna(axis=0, thresh=4)[m
+[32m+[m[32m                    df = df.drop('Industry / Category', 1)[m
+[32m+[m[32m                    df = df[df['Name'].str.contains(name, case=False)][m
+[32m+[m[32m                    data = pd.concat([data, df], ignore_index=True)[m
+[32m+[m[32m            return data[m
+[32m+[m
+[32m+[m[32m        def symbols(stock_symbols):[m
+[32m+[m[32m            data = pd.DataFrame()[m
+[32m+[m[32m            for symbol in stock_symbols:[m
+[32m+[m[32m                url = "https://finance.yahoo.com/lookup?s={}".format(symbol)[m
+[32m+[m[32m                resp = requests.get(url).text[m
+[32m+[m[32m                soup = BeautifulSoup(resp, "lxml")[m
+[32m+[m[32m                not_found = soup.find_all('div', {'Mt(25px) Bdw(1px) Bdc($borderGray) Bds(s) Bdrs(3px) Pt(50px) Pb(60px) Px(15px) smartphone_Mx(20px) smartphone_Mb(30px)'})[m
+[32m+[m[32m                if not_found:[m
+[32m+[m[32m                    print('stock ' + symbol + ' was not found')[m
+[32m+[m[32m                else:[m
+[32m+[m[32m                    d = pd.read_html(url)[m
+[32m+[m[32m                    df = d[0].dropna(axis=0, thresh=4)[m
+[32m+[m[32m                    df = df.drop('Industry / Category', 1)[m
+[32m+[m[32m                    df = df[df['Symbol'].str.contains(symbol, case=False)][m
+[32m+[m[32m                    data = pd.concat([data, df], ignore_index=True)[m
+[32m+[m[32m            return data[m
+[32m+[m
+[32m+[m[32m        if stocks is not None:[m
+[32m+[m[32m            stock_frame = names(stocks)[m
+[32m+[m[32m        if stock_symbols is not None:[m
+[32m+[m[32m            stock_frame = symbols(stock_symbols)[m
+[32m+[m
+[32m+[m[32m        return stock_frame[m
+ [m
+     def write_cloud(self, stock_frame):[m
+         """[m
+[1mdiff --git a/Scrapper.py b/Scrapper.py[m
+[1mindex 8c561e3..24c2394 100644[m
+[1m--- a/Scrapper.py[m
+[1m+++ b/Scrapper.py[m
+[36m@@ -1,39 +1,29 @@[m
+[31m-import requests[m
+[31m-import matplotlib as plt[m
+ from bs4 import BeautifulSoup[m
+[31m-[m
+[31m-url = 'https://finance.yahoo.com/'[m
+[31m-resp = requests.get(url)[m
+[31m-[m
+[31m-soup = BeautifulSoup(resp.text, 'html.parser')[m
+[31m-[m
+[31m-class Stocks:[m
+[31m-[m
+[31m-    def scrap(self, stocks:list):[m
+[31m-        """[m
+[31m-        Scrap the stock prices for selected period and save them in a list[m
+[31m-        :return:[m
+[31m-        """[m
+[31m-        pass[m
+[31m-[m
+[31m-    def write_cloud(self):[m
+[31m-        """[m
+[31m-        Upload the scrapped data to google docks spreadsheet[m
+[31m-        :return:[m
+[31m-        """[m
+[31m-        pass[m
+[31m-[m
+[31m-    def plot(self):[m
+[31m-        """[m
+[31m-        Plot the graph of stock price changes[m
+[31m-        :return:[m
+[31m-        """[m
+[31m-        pass[m
+[31m-[m
+[31m-    def set_limit(self):[m
+[31m-        """[m
+[31m-        Change colors according to price fluctuations[m
+[31m-        :return:[m
+[31m-        """[m
+[31m-        pass[m
+[31m-[m
+[32m+[m[32mimport requests[m
+[32m+[m[32mimport sys[m
+[32m+[m[32mfrom datetime import datetime, timedelta[m
+[32m+[m[32mimport pandas as pd[m
+[32m+[m
+[32m+[m[32mdef names(stocks):[m
+[32m+[m[32m    data = pd.DataFrame()[m
+[32m+[m[32m    for name in stocks:[m
+[32m+[m[32m        url = "https://finance.yahoo.com/lookup?s={}".format(name)[m
+[32m+[m[32m        d = pd.read_html(url)[m
+[32m+[m[32m        df = d[0].dropna(axis=0, thresh=4)[m
+[32m+[m[32m        df = df.drop('Industry / Category', 1)[m
+[32m+[m[32m        df = df[df['Name'].str.contains(name, case=False)][m
+[32m+[m[32m        data = pd.concat([data, df], ignore_index=True)[m
+[32m+[m[32m    return data[m
+[32m+[m
+[32m+[m[32mdef symbols(stock_symbols):[m
+[32m+[m[32m    data = pd.DataFrame()[m
+[32m+[m[32m    for symbol in stocks:[m
+[32m+[m[32m        url = "https://finance.yahoo.com/lookup?s={}".format(symbol)[m
+[32m+[m[32m        d = pd.read_html(url)[m
+[32m+[m[32m        df = d[0].dropna(axis=0, thresh=4)[m
+[32m+[m[32m        df = df.drop('Industry / Category', 1)[m
+[32m+[m[32m        df = df[df['Symbol'].str.contains(symbol, case=False)][m
+[32m+[m[32m        data = pd.concat([data, df], ignore_index=True)[m
+[32m+[m[32m    return data[m
+[32m+[m
+[32m+[m[32mnames(['Tesla', 'Keyence'])[m
+\ No newline at end of file[m
+[1mdiff --git a/jojo.py b/jojo.py[m
+[1mindex ad8e81b..33fad3b 100644[m
+[1m--- a/jojo.py[m
+[1m+++ b/jojo.py[m
+[36m@@ -1,6 +1,7 @@[m
+ from __future__ import print_function[m
+ import httplib2[m
+ import os[m
+[32m+[m[32mimport csv[m
+ [m
+ from apiclient import discovery[m
+ from oauth2client import tools, file, client[m
+[36m@@ -13,6 +14,64 @@[m [mexcept ImportError:[m
+ [m
+ import ApiAuth[m
+ [m
+[32m+[m
+[32m+[m[32mdef csv_reader():[m
+[32m+[m[32m    path = str(input())[m
+[32m+[m[32m    while True:[m
+[32m+[m[32m        if path[-4:] == '.csv':[m
+[32m+[m[32m            try:[m
+[32m+[m[32m                csv_file = open(path)[m
+[32m+[m[32m                break[m
+[32m+[m[32m            except OSError:[m
+[32m+[m[32m                print('You have entered the unexisting path')[m
+[32m+[m[32m                print('Please provide a path to the CSV files with stock names: ')[m
+[32m+[m[32m                path = str(input())[m
+[32m+[m[32m                continue[m
+[32m+[m[32m        else:[m
+[32m+[m[32m            print('The file path did not lead to csv file')[m
+[32m+[m[32m            print('Please re-enter the path: ')[m
+[32m+[m[32m            path = str(input())[m
+[32m+[m[32m            continue[m
+[32m+[m[32m    csv_read = csv.reader(csv_file)[m
+[32m+[m[32m    stocks = [item for sublist in list(csv_read) for item in sublist][m
+[32m+[m[32m    return stocks[m
+[32m+[m
+[32m+[m
+[32m+[m[32mwhile True:[m
+[32m+[m[32m    print('Please specify if you want to enter stock names or stock symbols')[m
+[32m+[m[32m    print('Enter 1 for stock names, 2 for stock symbols, 3 to quit: ')[m
+[32m+[m[32m    f = input()[m
+[32m+[m[32m    if f == 1:[m
+[32m+[m[32m        print('Would you like to enter stock names manually or use CSV file?')[m
+[32m+[m[32m        print('Enter 1 to enter stock names manually, 2 to load from file: ')[m
+[32m+[m[32m        f = input()[m
+[32m+[m[32m        if f == 1:[m
+[32m+[m[32m            print('Please enter the stock names separated by space')[m
+[32m+[m[32m            stocks = [i for i in input().split()][m
+[32m+[m[32m            break[m
+[32m+[m[32m        elif f == 2:[m
+[32m+[m[32m            stocks = csv_reader()[m
+[32m+[m[32m        else:[m
+[32m+[m[32m            print('Please choose from 1 or 2')[m
+[32m+[m[32m            continue[m
+[32m+[m[32m    elif f == 2:[m
+[32m+[m[32m        print('Would you like to enter stock names manually or use CSV file?')[m
+[32m+[m[32m        print('Enter 1 to enter stock names manually, 2 to load from file: ')[m
+[32m+[m[32m        f = input()[m
+[32m+[m[32m        if f == 1:[m
+[32m+[m[32m            print('Please enter the stock symbols separated by space')[m
+[32m+[m[32m            stock_symbols = [i for i in input().split()][m
+[32m+[m[32m        elif f == 2:[m
+[32m+[m[32m            stock_symbols = csv_reader()[m
+[32m+[m[32m        else:[m
+[32m+[m[32m            print('Please choose from 1 or 2')[m
+[32m+[m[32m            continue[m
+[32m+[m[32m    elif f == 3:[m
+[32m+[m[32m        break[m
+[32m+[m[32m    else:[m
+[32m+[m[32m        print('You have entered wrong key')[m
+[32m+[m[32m        continue[m
+[32m+[m
+ SCOPES = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive',[m
+           'https://www.googleapis.com/auth/drive.file'][m
+ [m
+[1mdiff --git a/scraptest.py b/scraptest.py[m
+[1mindex 4e4387a..7098d2b 100644[m
+[1m--- a/scraptest.py[m
+[1m+++ b/scraptest.py[m
+[36m@@ -2,7 +2,7 @@[m [mimport requests[m
+ from bs4 import BeautifulSoup[m
+ import pandas as pd[m
+ [m
+[31m-stocks_frame = pd.DataFrame(data = {'Price': [], 'Current price': [], 'Current price timestamp' : []})[m
+[32m+[m[32m#stocks_frame = pd.DataFrame(data = {'Price': [], 'Current price': [], 'Current price timestamp' : []})[m
+ [m
+ url = 'https://finance.yahoo.com/quote/TSLA'[m
+ resp = requests.get(url)[m
+[36m@@ -16,4 +16,8 @@[m [mprice = soup.find_all('div', {'class': 'My(6px) Pos(r) smartphone_Mt(6px)'})[0].[m
+ #soup.find_all('div', {'class': 'My(6px) Pos(r) smartphone_Mt(6px)'})[0].find('p').find('span').text[m
+ [m
+ Current = soup.find_all('div', {'class': 'My(6px) Pos(r) smartphone_Mt(6px)'})[0].find('p').text[m
+[32m+[m[32mcurrent_price = ''[m
+ if 'After hours' or 'Pre-market' in Current:[m
+[32m+[m[32m    current_price = soup.find_all('div', {'class': 'My(6px) Pos(r) smartphone_Mt(6px)'})[0].find('p').find('span').text[m
+[32m+[m
+[32m+[m[32mprint(price, current_price)[m
+\ No newline at end of file[m
+[1mdiff --git a/test.py b/test.py[m
+[1mnew file mode 100644[m
+[1mindex 0000000..40bf7f9[m
+[1m--- /dev/null[m
+[1m+++ b/test.py[m
+[36m@@ -0,0 +1,15 @@[m
+[32m+[m[32mimport ApiAuth[m
+[32m+[m[32mimport requests[m
+[32m+[m[32mfrom bs4 import BeautifulSoup[m
+[32m+[m
+[32m+[m
+[32m+[m[32msymbols = ['advadv', 'TL0.DE', 'TSLA.MX', 'TL0.F'][m
+[32m+[m
+[32m+[m[32mdf = ApiAuth.Stocks().scrap(stock_symbols=symbols)[m
+[32m+[m[32mprint(df)[m
+[32m+[m
+[32m+[m[32mfor symbol in df['Symbol'].values:[m
+[32m+[m[32m    url = 'https://finance.yahoo.com/quote/{}'.format(symbol)[m
+[32m+[m[32m    resp = requests.get(url)[m
+[32m+[m[32m    soup = BeautifulSoup(resp.text, "html.parser")[m
+[32m+[m
