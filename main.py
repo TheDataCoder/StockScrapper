@@ -5,7 +5,6 @@ Further development may include direct export to csv file and setting alarms to 
 """
 
 
-from __future__ import print_function
 import httplib2
 import csv
 import numpy as np
